@@ -1,12 +1,5 @@
 import pytest
-from app.models import User, Portfolio
-from app.service.portfolio_service import create_portfolio
-from app.service.trade_service import InsufficientFundsError, execute_purchase_order
-import app.service.security_service as security_service
 from app.service.security_service import get_all_securities, SecurityException, get_security_by_ticker
-from app.service.user_service import create_user
-from app.service import transaction_service
-
 from app.service.alpha_vantage_client import SecurityQuote
 
 @pytest.fixture(autouse=True)

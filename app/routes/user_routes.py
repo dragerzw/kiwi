@@ -26,6 +26,7 @@ def get_user(username):
 
 
 @user_bp.route('/', methods=['POST'])
+@require_auth
 def create_user():
     req_data = UserCreateRequest(**request.get_json())
     user_service.create_user(

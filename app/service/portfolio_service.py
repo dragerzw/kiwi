@@ -53,6 +53,10 @@ def grant_portfolio_access(portfolio_id: int, username: str, role: str):
     if not portfolio:
         raise UnsupportedPortfolioOperationError(f'Portfolio {portfolio_id} does not exist.')
         
+    user = db.session.query(User).filter_by(username=username).one_or_none()
+    if not user:
+        raise UnsupportedPortfolioOperationError(f'User {username} does not exist.')
+
     access = db.session.query(PortfolioAccess).filter_by(portfolio_id=portfolio_id, username=username).one_or_none()
     if access:
         access.role = role

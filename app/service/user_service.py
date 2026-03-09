@@ -50,5 +50,6 @@ def delete_user(username: str):
         if not user:
             raise UnsupportedUserOperationError(f'User with username {username} does not exist')
         db.session.delete(user)
+        db.session.flush()
     except IntegrityError:
         raise UnsupportedUserOperationError(f'Cannot delete user {username} due to existing dependencies')

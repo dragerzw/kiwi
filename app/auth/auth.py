@@ -25,10 +25,10 @@ def get_cognito_jwks_url() -> str:
 def get_jwks() -> dict:
     url = get_cognito_jwks_url()
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         return response.json()
-    except Exception as e:
+    except requests.RequestException as e:
         logger.error(f"Failed to fetch JWKS: {e}")
         raise AuthError("Unable to fetch JWKS for authentication.", 500)
 

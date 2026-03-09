@@ -44,12 +44,7 @@ class Portfolio(db.Model):
         username = user_str.username if user_str else 'N/A'
         investments = []
         for investment in self.investments:
-            investments.append(
-                {
-                    'ticker': investment.ticker,
-                    'quantity': investment.quantity,
-                }
-            )
+            investments.append(f'{investment.ticker}:{investment.quantity}')
         return f'<Portfolio: id={self.id}; name={self.name}; description={self.description}; user={username}; investments={", ".join(investments)}>'
 
     def __to_dict__(self):

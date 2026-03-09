@@ -1,7 +1,7 @@
 import pytest
+from sqlalchemy.exc import IntegrityError
 import app.service.user_service as user_service
 from app.models import User
-from app.service.portfolio_service import create_portfolio
 
 def test_get_all_users_exception(db_session, monkeypatch):
     def raise_exception(*args, **kwargs):
@@ -33,10 +33,9 @@ def test_create_user_db_exception(db_session, monkeypatch):
     assert "Database error" in str(e.value)
 
 def test_create_user_duplicate_username_raises(db_session):
-    with pytest.raises(Exception) as e:
+    with pytest.raises(IntegrityError):
         user_service.create_user('admin', 'xxx', 'Admin', 'User', 100.00)
         db_session.flush()
-    assert "UNIQUE constraint failed: users.username" in str(e.value) or "Duplicate" in str(e.value) or "admin" in str(e.value)
 
 def test_delete_user(db_session):
     users = user_service.get_all_users()

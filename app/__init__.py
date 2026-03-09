@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from pydantic import ValidationError
+from werkzeug.exceptions import HTTPException
 
 from app.db import db
 from app.cache import cache
@@ -20,11 +21,17 @@ def create_app(config):
         app.register_blueprint(portfolio_bp, url_prefix='/portfolios')
         app.register_blueprint(security_bp, url_prefix='/securities')
         app.register_blueprint(trade_bp, url_prefix='/trades')
-        # Register global error handler
+
+        # Register error handlers
+        @app.errorhandler(HTTPException)
+        def handle_http_exception(e):
+            return jsonify({'error': e.name, 'detail': e.description}), e.code
+
         @app.errorhandler(Exception)
         def handle_exception(e):
             db.session.rollback()
-            return jsonify({'error': 'Internal Server Error', 'detail': str(e)}), 500
+            detail = str(e) if app.debug else 'An unexpected error occurred'
+            return jsonify({'error': 'Internal Server Error', 'detail': detail}), 500
 
         @app.errorhandler(ValidationError)
         def handle_validation_error(e: ValidationError):

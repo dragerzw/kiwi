@@ -23,9 +23,12 @@ def get_company_name(ticker: str) -> Optional[str]:
         raise AlphaVantageError("ALPHA_VANTAGE_API_KEY is not configured")
     
     url = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={ticker}&apikey={api_key}"
-    response = requests.get(url)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as e:
+        raise AlphaVantageError(f"Failed to fetch company name for {ticker}: {e}")
     
     matches = data.get("bestMatches", [])
     if not matches:
@@ -44,9 +47,12 @@ def get_price_data(ticker: str) -> Optional[dict]:
         raise AlphaVantageError("ALPHA_VANTAGE_API_KEY is not configured")
         
     url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={api_key}"
-    response = requests.get(url)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as e:
+        raise AlphaVantageError(f"Failed to fetch price data for {ticker}: {e}")
     
     quote = data.get("Global Quote", {})
     if not quote or "05. price" not in quote:

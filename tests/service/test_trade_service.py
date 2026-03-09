@@ -1,5 +1,5 @@
 import pytest
-from app.models import User, Portfolio, Investment
+from app.models import User, Portfolio
 from app.service.portfolio_service import create_portfolio
 from app.service.trade_service import InsufficientFundsError, execute_purchase_order, TradeExecutionException, liquidate_investment
 from app.service.alpha_vantage_client import SecurityQuote
