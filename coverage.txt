@@ -1,0 +1,320 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-8.4.2, pluggy-1.6.0
+rootdir: D:\kiwi
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 50 items
+
+tests\auth\test_auth.py .FFF                                             [  8%]
+tests\service\test_alpha_vantage_client.py FFFF                          [ 16%]
+tests\service\test_portfolio_service.py ................                 [ 48%]
+tests\service\test_security_service.py ...                               [ 54%]
+tests\service\test_trade_service.py ......                               [ 66%]
+tests\service\test_transaction_service.py ...                            [ 72%]
+tests\service\test_user_service.py ..............                        [100%]
+
+================================== FAILURES ===================================
+_____________________________ test_invalid_bearer _____________________________
+
+client = <FlaskClient <Flask 'app'>>, app = <Flask 'app'>
+
+    def test_invalid_bearer(client, app):
+        from app.auth import require_auth
+        with app.app_context():
+>           @app.route('/protected2')
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\auth\test_auth.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\flask\sansio\scaffold.py:46: in wrapper_func
+    self._check_setup_finished(f_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Flask 'app'>, f_name = 'route'
+
+    def _check_setup_finished(self, f_name: str) -> None:
+        if self._got_first_request:
+>           raise AssertionError(
+                f"The setup method '{f_name}' can no longer be called"
+                " on the application. It has already handled its first"
+                " request, any changes will not be applied"
+                " consistently.\n"
+                "Make sure all imports, decorators, functions, etc."
+                " needed to set up the application are done before"
+                " running it."
+            )
+E           AssertionError: The setup method 'route' can no longer be called on the application. It has already handled its first request, any changes will not be applied consistently.
+E           Make sure all imports, decorators, functions, etc. needed to set up the application are done before running it.
+
+.venv\Lib\site-packages\flask\sansio\app.py:415: AssertionError
+___________________________ test_valid_token_mocked ___________________________
+
+client = <FlaskClient <Flask 'app'>>, app = <Flask 'app'>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002AC9C9D48A0>
+
+    def test_valid_token_mocked(client, app, monkeypatch):
+        from app.auth import require_auth
+        with app.app_context():
+>           @app.route('/protected3')
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\auth\test_auth.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\flask\sansio\scaffold.py:46: in wrapper_func
+    self._check_setup_finished(f_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Flask 'app'>, f_name = 'route'
+
+    def _check_setup_finished(self, f_name: str) -> None:
+        if self._got_first_request:
+>           raise AssertionError(
+                f"The setup method '{f_name}' can no longer be called"
+                " on the application. It has already handled its first"
+                " request, any changes will not be applied"
+                " consistently.\n"
+                "Make sure all imports, decorators, functions, etc."
+                " needed to set up the application are done before"
+                " running it."
+            )
+E           AssertionError: The setup method 'route' can no longer be called on the application. It has already handled its first request, any changes will not be applied consistently.
+E           Make sure all imports, decorators, functions, etc. needed to set up the application are done before running it.
+
+.venv\Lib\site-packages\flask\sansio\app.py:415: AssertionError
+_____________________________ test_expired_token ______________________________
+
+client = <FlaskClient <Flask 'app'>>, app = <Flask 'app'>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002AC9CA77E10>
+
+    def test_expired_token(client, app, monkeypatch):
+        from app.auth import require_auth
+        with app.app_context():
+>           @app.route('/protected4')
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\auth\test_auth.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\flask\sansio\scaffold.py:46: in wrapper_func
+    self._check_setup_finished(f_name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Flask 'app'>, f_name = 'route'
+
+    def _check_setup_finished(self, f_name: str) -> None:
+        if self._got_first_request:
+>           raise AssertionError(
+                f"The setup method '{f_name}' can no longer be called"
+                " on the application. It has already handled its first"
+                " request, any changes will not be applied"
+                " consistently.\n"
+                "Make sure all imports, decorators, functions, etc."
+                " needed to set up the application are done before"
+                " running it."
+            )
+E           AssertionError: The setup method 'route' can no longer be called on the application. It has already handled its first request, any changes will not be applied consistently.
+E           Make sure all imports, decorators, functions, etc. needed to set up the application are done before running it.
+
+.venv\Lib\site-packages\flask\sansio\app.py:415: AssertionError
+____________________________ test_get_company_name ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002AC9C8B79B0>
+app = <Flask 'app'>
+
+    def test_get_company_name(monkeypatch, app):
+        with app.app_context():
+            import requests
+            class MockResponse:
+                def json(self):
+                    return {"bestMatches": [{"2. name": "Apple Inc."}]}
+            def mock_get(*args, **kwargs):
+                return MockResponse()
+            monkeypatch.setattr(requests, "get", mock_get)
+>           assert get_company_name("AAPL") == "Apple Inc."
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\service\test_alpha_vantage_client.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ticker = 'AAPL'
+
+    @cache.memoize(timeout=300)
+    def get_company_name(ticker: str) -> Optional[str]:
+        api_key = current_app.config.get("ALPHA_VANTAGE_API_KEY")
+        if not api_key:
+>           raise AlphaVantageError("ALPHA_VANTAGE_API_KEY is not configured")
+E           app.service.alpha_vantage_client.AlphaVantageError: ALPHA_VANTAGE_API_KEY is not configured
+
+app\service\alpha_vantage_client.py:23: AlphaVantageError
+_____________________________ test_get_price_data _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002AC9CB3DAE0>
+app = <Flask 'app'>
+
+    def test_get_price_data(monkeypatch, app):
+        with app.app_context():
+            import requests
+            class MockResponse:
+                def json(self):
+                    return {"Global Quote": {"05. price": "150.00", "07. latest trading day": "2023-11-20"}}
+            def mock_get(*args, **kwargs):
+                return MockResponse()
+            monkeypatch.setattr(requests, "get", mock_get)
+>           price, date = get_price_data("AAPL")
+                          ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\service\test_alpha_vantage_client.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ticker = 'AAPL'
+
+    @cache.memoize(timeout=300)
+    def get_price_data(ticker: str) -> Optional[dict]:
+        api_key = current_app.config.get("ALPHA_VANTAGE_API_KEY")
+        if not api_key:
+>           raise AlphaVantageError("ALPHA_VANTAGE_API_KEY is not configured")
+E           app.service.alpha_vantage_client.AlphaVantageError: ALPHA_VANTAGE_API_KEY is not configured
+
+app\service\alpha_vantage_client.py:44: AlphaVantageError
+_______________________________ test_get_quote ________________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002AC9CB3DD00>
+app = <Flask 'app'>
+
+    def test_get_quote(monkeypatch, app):
+        with app.app_context():
+            import requests
+            class MockResponse:
+                def json(self):
+                    return {"Global Quote": {"05. price": "150.00", "07. latest trading day": "2023-11-20"}, "bestMatches": [{"2. name": "Apple Inc."}]}
+    
+            def mock_get(url, *args, **kwargs):
+                return MockResponse()
+            monkeypatch.setattr(requests, "get", mock_get)
+    
+>           quote = get_quote("AAPL")
+                    ^^^^^^^^^^^^^^^^^
+
+tests\service\test_alpha_vantage_client.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\service\alpha_vantage_client.py:64: in get_quote
+    price_data = get_price_data(ticker)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ticker = 'AAPL'
+
+    @cache.memoize(timeout=300)
+    def get_price_data(ticker: str) -> Optional[dict]:
+        api_key = current_app.config.get("ALPHA_VANTAGE_API_KEY")
+        if not api_key:
+>           raise AlphaVantageError("ALPHA_VANTAGE_API_KEY is not configured")
+E           app.service.alpha_vantage_client.AlphaVantageError: ALPHA_VANTAGE_API_KEY is not configured
+
+app\service\alpha_vantage_client.py:44: AlphaVantageError
+___________________________ test_get_quote_invalid ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002AC9CBCA850>
+app = <Flask 'app'>
+
+    def test_get_quote_invalid(monkeypatch, app):
+        with app.app_context():
+            import requests
+            class MockResponse:
+                def json(self):
+                    return {"Global Quote": {}}
+    
+            def mock_get(url, *args, **kwargs):
+                return MockResponse()
+            monkeypatch.setattr(requests, "get", mock_get)
+    
+>           assert get_quote("INVALID") is None
+                   ^^^^^^^^^^^^^^^^^^^^
+
+tests\service\test_alpha_vantage_client.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\service\alpha_vantage_client.py:64: in get_quote
+    price_data = get_price_data(ticker)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+ticker = 'INVALID'
+
+    @cache.memoize(timeout=300)
+    def get_price_data(ticker: str) -> Optional[dict]:
+        api_key = current_app.config.get("ALPHA_VANTAGE_API_KEY")
+        if not api_key:
+>           raise AlphaVantageError("ALPHA_VANTAGE_API_KEY is not configured")
+E           app.service.alpha_vantage_client.AlphaVantageError: ALPHA_VANTAGE_API_KEY is not configured
+
+app\service\alpha_vantage_client.py:44: AlphaVantageError
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.14.0-final-0 _______________
+
+Name                                      Stmts   Miss  Cover
+-------------------------------------------------------------
+app\__init__.py                              26      6    77%
+app\auth\__init__.py                          2      0   100%
+app\auth\auth.py                             70     48    31%
+app\cache.py                                  2      0   100%
+app\config.py                                26      3    88%
+app\db.py                                     2      0   100%
+app\main.py                                   4      4     0%
+app\models\Investment.py                     14      1    93%
+app\models\Portfolio.py                      27     10    63%
+app\models\PortfolioAccess.py                17      2    88%
+app\models\Transaction.py                    21      2    90%
+app\models\User.py                           18      1    94%
+app\models\__init__.py                        6      0   100%
+app\routes\__init__.py                        5      0   100%
+app\routes\portfolio_routes.py               88     53    40%
+app\routes\security_routes.py                23      8    65%
+app\routes\trade_routes.py                   25     12    52%
+app\routes\user_routes.py                    43     19    56%
+app\schemas\portfolio_access_schemas.py       4      0   100%
+app\schemas\portfolio_schemas.py              2      0   100%
+app\schemas\trade_schemas.py                  3      0   100%
+app\schemas\user_schemas.py                   3      0   100%
+app\service\__init__.py                       2      0   100%
+app\service\alpha_vantage_client.py          47     25    47%
+app\service\portfolio_service.py             52     20    62%
+app\service\security_service.py              11      0   100%
+app\service\trade_service.py                 45      3    93%
+app\service\transaction_service.py           12      0   100%
+app\service\user_service.py                  32      2    94%
+-------------------------------------------------------------
+TOTAL                                       632    219    65%
+=========================== short test summary info ===========================
+FAILED tests/auth/test_auth.py::test_invalid_bearer - AssertionError: The set...
+FAILED tests/auth/test_auth.py::test_valid_token_mocked - AssertionError: The...
+FAILED tests/auth/test_auth.py::test_expired_token - AssertionError: The setu...
+FAILED tests/service/test_alpha_vantage_client.py::test_get_company_name - ap...
+FAILED tests/service/test_alpha_vantage_client.py::test_get_price_data - app....
+FAILED tests/service/test_alpha_vantage_client.py::test_get_quote - app.servi...
+FAILED tests/service/test_alpha_vantage_client.py::test_get_quote_invalid - a...
+======================== 7 failed, 43 passed in 0.93s =========================
