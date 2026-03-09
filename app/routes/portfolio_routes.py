@@ -14,7 +14,10 @@ portfolio_bp = Blueprint('portfolio', __name__)
 def _enrich_portfolio(portfolio_dict: dict) -> dict:
     total_value = 0.0
     for inv in portfolio_dict.get('investments', []):
-        quote = get_quote(inv['ticker'])
+        try:
+            quote = get_quote(inv['ticker'])
+        except Exception:
+            quote = None
         if quote:
             inv['current_price'] = quote.price
             inv['total_value'] = quote.price * inv['quantity']
@@ -57,7 +60,7 @@ def get_portfolios_by_user(username):
 @portfolio_bp.route('/', methods=['POST'])
 @require_auth
 def create_portfolio():
-    req_data = PortfolioCreateRequest(**request.get_json())
+    req_data = PortfolioCreateRequest(**(request.get_json(silent=True) or {}))
     if g.username != req_data.username:
         return jsonify({'error': 'Can only create portfolio for authenticated user'}), 403
     user = user_service.get_user_by_username(req_data.username)
@@ -95,7 +98,7 @@ def get_portfolio_transactions(portfolio_id):
 def grant_access(portfolio_id):
     if not portfolio_service.has_portfolio_access(portfolio_id, g.username, ['Owner']):
         return jsonify({'error': 'Only the Owner can grant access to this portfolio'}), 403
-    req_data = PortfolioAccessRequest(**request.get_json())
+    req_data = PortfolioAccessRequest(**(request.get_json(silent=True) or {}))
     portfolio_service.grant_portfolio_access(portfolio_id, req_data.username, req_data.role)
     db.session.commit()
     return jsonify({'message': 'Portfolio access granted successfully'}), 200

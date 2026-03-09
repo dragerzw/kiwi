@@ -12,7 +12,7 @@ trade_bp = Blueprint('trade', __name__)
 @trade_bp.route('/buy', methods=['POST'])
 @require_auth
 def buy_trade():
-    req_data = TradeBuyRequest(**request.get_json())
+    req_data = TradeBuyRequest(**(request.get_json(silent=True) or {}))
     if not has_portfolio_access(req_data.portfolio_id, g.username, ['Owner', 'Manager']):
         return jsonify({'error': 'Unauthorized to trade on this portfolio'}), 403
     trade_service.execute_purchase_order(
@@ -27,7 +27,7 @@ def buy_trade():
 @trade_bp.route('/sell', methods=['POST'])
 @require_auth
 def sell_trade():
-    req_data = TradeSellRequest(**request.get_json())
+    req_data = TradeSellRequest(**(request.get_json(silent=True) or {}))
     if not has_portfolio_access(req_data.portfolio_id, g.username, ['Owner', 'Manager']):
         return jsonify({'error': 'Unauthorized to trade on this portfolio'}), 403
     trade_service.liquidate_investment(

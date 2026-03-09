@@ -27,15 +27,36 @@ def create_app(config):
         def handle_http_exception(e):
             return jsonify({'error': e.name, 'detail': e.description}), e.code
 
+        @app.errorhandler(ValidationError)
+        def handle_validation_error(e: ValidationError):
+            return jsonify({'error': 'Validation Error', 'detail': e.errors()}), 422
+
+        # Domain exception handlers — return 400 instead of 500
+        from app.service.user_service import UnsupportedUserOperationError
+        from app.service.portfolio_service import UnsupportedPortfolioOperationError
+        from app.service.trade_service import TradeExecutionException, InsufficientFundsError
+
+        @app.errorhandler(UnsupportedUserOperationError)
+        def handle_user_error(e):
+            return jsonify({'error': str(e)}), 400
+
+        @app.errorhandler(UnsupportedPortfolioOperationError)
+        def handle_portfolio_error(e):
+            return jsonify({'error': str(e)}), 400
+
+        @app.errorhandler(TradeExecutionException)
+        def handle_trade_error(e):
+            return jsonify({'error': str(e)}), 400
+
+        @app.errorhandler(InsufficientFundsError)
+        def handle_insufficient_funds_error(e):
+            return jsonify({'error': str(e)}), 400
+
         @app.errorhandler(Exception)
         def handle_exception(e):
             db.session.rollback()
             detail = str(e) if app.debug else 'An unexpected error occurred'
             return jsonify({'error': 'Internal Server Error', 'detail': detail}), 500
-
-        @app.errorhandler(ValidationError)
-        def handle_validation_error(e: ValidationError):
-            return jsonify({'error': 'Validation Error', 'detail': e.errors()}), 422
 
         return app
     except Exception as e:

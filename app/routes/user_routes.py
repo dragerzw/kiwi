@@ -28,7 +28,7 @@ def get_user(username):
 @user_bp.route('/', methods=['POST'])
 @require_auth
 def create_user():
-    req_data = UserCreateRequest(**request.get_json())
+    req_data = UserCreateRequest(**(request.get_json(silent=True) or {}))
     user_service.create_user(
         username=req_data.username,
         password=req_data.password,
@@ -43,7 +43,7 @@ def create_user():
 @user_bp.route('/update-balance', methods=['PUT'])
 @require_auth
 def update_balance():
-    req_data = UserUpdateBalanceRequest(**request.get_json())
+    req_data = UserUpdateBalanceRequest(**(request.get_json(silent=True) or {}))
     user_service.update_user_balance(username=req_data.username, new_balance=req_data.new_balance)
     db.session.commit()
     return jsonify({'message': 'User balance updated successfully'}), 200

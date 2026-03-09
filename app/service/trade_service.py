@@ -78,6 +78,14 @@ def liquidate_investment(portfolio_id: int, ticker: str, quantity: int, sale_pri
         TradeExecutionException: If the portfolio, investment, or quantity is invalid,
             or if a database error occurs while recording the sale.
     """
+    if portfolio_id is None or not ticker or not quantity or quantity <= 0:
+        raise TradeExecutionException(
+            f'Invalid liquidation parameters [portfolio_id={portfolio_id}, ticker={ticker}, quantity={quantity}]'
+        )
+    if sale_price is None or sale_price < 0:
+        raise TradeExecutionException(
+            f'Invalid sale price: {sale_price}. Must be non-negative.'
+        )
     portfolio = db.session.query(Portfolio).filter_by(id=portfolio_id).one_or_none()
     if not portfolio:
         raise TradeExecutionException(f'Portfolio with id {portfolio_id} does not exist')
