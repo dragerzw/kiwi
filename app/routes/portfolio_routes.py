@@ -63,13 +63,13 @@ def create_portfolio():
     user = user_service.get_user_by_username(req_data.username)
     if user is None:
         return jsonify({'error': f'User {req_data.username} not found'}), 404
-    portfolio_id = portfolio_service.create_portfolio(
+    portfolio = portfolio_service.create_portfolio(
         name=req_data.name,
         description=req_data.description,
         user=user,
     )
     db.session.commit()
-    return jsonify({'message': 'Portfolio created successfully', 'portfolio_id': portfolio_id}), 201
+    return jsonify({'message': 'Portfolio created successfully', 'portfolio_id': portfolio.id}), 201
 
 
 @portfolio_bp.route('/<int:portfolio_id>', methods=['DELETE'])

@@ -32,8 +32,21 @@ def client(app):
     """A test client for the app."""
     return app.test_client()
 
-
 @pytest.fixture(scope='function')
+def auth_headers(monkeypatch):
+    """Provides valid authorization headers for tests."""
+    monkeypatch.setattr('app.auth.auth.jwt.get_unverified_header', lambda x: {"kid": "key1"})
+    monkeypatch.setattr('app.auth.auth.get_jwks', lambda: {"keys": [{"kid": "key1", "kty": "RSA", "alg": "RS256"}]})
+    monkeypatch.setattr('app.auth.auth.RSAAlgorithm.from_jwk', lambda x: "dummy_rsa_key")
+    
+    def mock_decode(*args, **kwargs):
+        return {"sub": "admin", "username": "admin"}
+    monkeypatch.setattr('app.auth.auth.jwt.decode', mock_decode)
+
+    return {"Authorization": "Bearer validtoken"}
+
+
+@pytest.fixture(scope='function', autouse=True)
 def db_session(app) -> Generator[Session]:
     """A database session scoped to a single test function."""
     with app.app_context():
@@ -49,10 +62,6 @@ def db_session(app) -> Generator[Session]:
 
 
 def _populate_database(session):
-    try:
-        admin_user = User(username='admin', password='admin', firstname='Admin', lastname='User', balance=1000.00)
-        session.add(admin_user)
-    except Exception:
-        session.rollback()
-    finally:
-        session.commit()
+    admin_user = User(username='admin', password='admin', firstname='Admin', lastname='User', balance=1000.00)
+    session.add(admin_user)
+    session.commit()

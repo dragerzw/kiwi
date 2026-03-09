@@ -12,16 +12,16 @@ class PortfolioOperationError(Exception):
     pass
 
 
-def create_portfolio(name: str, description: str, user: User) -> int:
+def create_portfolio(name: str, description: str, user: User) -> Portfolio:
     if not name or not description or not user:
         raise UnsupportedPortfolioOperationError(
             f'Invalid input[name:{name}, description: {description}, user: {user}]. Please try again.'
         )
     portfolio = Portfolio(name=name, description=description, user=user)
-    owner_access = PortfolioAccess(username=user.username, role='Owner', portfolio_id=portfolio.id)
+    owner_access = PortfolioAccess(username=user.username, role='Owner')
     portfolio.accesses.append(owner_access)
     db.session.add(portfolio)
-    return portfolio.id
+    return portfolio
 
 
 def get_portfolios_by_user(user: User) -> List[Portfolio]:
