@@ -6,6 +6,7 @@ import app.service.user_service as user_service
 from app.db import db
 from app.schemas.portfolio_schemas import PortfolioCreateRequest
 from app.schemas.portfolio_access_schemas import PortfolioAccessRequest
+from app.schemas.error_schemas import ErrorResponse
 from app.service.alpha_vantage_client import get_quote
 from app.auth import require_auth
 
@@ -23,8 +24,8 @@ def _enrich_portfolio(portfolio_dict: dict) -> dict:
             inv['total_value'] = quote.price * inv['quantity']
             total_value += inv['total_value']
         else:
-            inv['current_price'] = 0.0
-            inv['total_value'] = 0.0
+            inv['current_price'] = None
+            inv['total_value'] = None
     
     portfolio_dict['total_portfolio_value'] = total_value
     return portfolio_dict
@@ -32,7 +33,8 @@ def _enrich_portfolio(portfolio_dict: dict) -> dict:
 @portfolio_bp.route('/', methods=['GET'])
 @require_auth
 def get_all_portfolios():
-    portfolios = portfolio_service.get_all_portfolios()
+    user = user_service.get_user_by_username(g.username)
+    portfolios = portfolio_service.get_portfolios_by_user(user)
     return jsonify([_enrich_portfolio(p.__to_dict__()) for p in portfolios]), 200
 
 
@@ -50,6 +52,9 @@ def get_portfolio(portfolio_id):
 @portfolio_bp.route('/user/<username>', methods=['GET'])
 @require_auth
 def get_portfolios_by_user(username):
+    if g.username != username:
+        error_response = ErrorResponse(error='Unauthorized to view these portfolios', code=403)
+        return jsonify(error_response.model_dump()), 403
     user = user_service.get_user_by_username(username)
     if user is None:
         return jsonify({'error': f'User {username} not found'}), 404

@@ -5,7 +5,7 @@ import app.service.transaction_service as transaction_service
 
 from dataclasses import asdict
 from app.auth import require_auth
-from app.service.security_service import SecurityException
+from app.service.security_service import SecurityException, SecurityNotFoundException, SecurityFetchException
 from app.schemas.error_schemas import ErrorResponse
 
 
@@ -24,9 +24,12 @@ def get_security(ticker):
     try:
         security = security_service.get_security_by_ticker(ticker)
         return jsonify(asdict(security)), 200
-    except SecurityException as e:
+    except SecurityNotFoundException as e:
         error_response = ErrorResponse(error=str(e), code=404)
         return jsonify(error_response.model_dump()), 404
+    except SecurityFetchException as e:
+        error_response = ErrorResponse(error=str(e), code=502)
+        return jsonify(error_response.model_dump()), 502
 
 
 @security_bp.route('/<ticker>/transactions', methods=['GET'])

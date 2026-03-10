@@ -10,3 +10,4 @@ app.*
 local/
 .ruff*
 *.md
+test_output.txt

@@ -1,10 +1,12 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
 
 import app.service.transaction_service as transaction_service
 import app.service.user_service as user_service
 from app.db import db
 from app.schemas.user_schemas import UserCreateRequest, UserUpdateBalanceRequest
 from app.auth import require_auth
+from sqlalchemy.exc import IntegrityError
+from app.schemas.error_schemas import ErrorResponse
 
 user_bp = Blueprint('user', __name__)
 
@@ -29,15 +31,20 @@ def get_user(username):
 @require_auth
 def create_user():
     req_data = UserCreateRequest(**(request.get_json(silent=True) or {}))
-    user_service.create_user(
-        username=req_data.username,
-        password=req_data.password,
-        firstname=req_data.firstname,
-        lastname=req_data.lastname,
-        balance=req_data.balance,
-    )
-    db.session.commit()
-    return jsonify({'message': 'User created successfully'}), 201
+    try:
+        user_service.create_user(
+            username=req_data.username,
+            password=req_data.password,
+            firstname=req_data.firstname,
+            lastname=req_data.lastname,
+            balance=req_data.balance,
+        )
+        db.session.commit()
+        return jsonify({'message': 'User created successfully'}), 201
+    except IntegrityError:
+        db.session.rollback()
+        error_response = ErrorResponse(error='Username already exists', code=409)
+        return jsonify(error_response.model_dump()), 409
 
 
 @user_bp.route('/update-balance', methods=['PUT'])
@@ -60,5 +67,8 @@ def delete_user(username):
 @user_bp.route('/<username>/transactions', methods=['GET'])
 @require_auth
 def get_user_transactions(username):
+    if g.username != username:
+        error_response = ErrorResponse(error='Unauthorized to view these transactions', code=403)
+        return jsonify(error_response.model_dump()), 403
     transactions = transaction_service.get_transactions_by_user(username)
     return jsonify([transaction.__to_dict__() for transaction in transactions]), 200

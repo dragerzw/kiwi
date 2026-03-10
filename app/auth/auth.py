@@ -1,7 +1,6 @@
 from functools import wraps
 import json
 import logging
-from typing import Optional
 from flask import request, jsonify, g, current_app
 import jwt
 from jwt.algorithms import RSAAlgorithm

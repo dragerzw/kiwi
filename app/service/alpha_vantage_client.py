@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Optional
-import os
 import requests
 from flask import current_app
 
