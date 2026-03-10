@@ -45,10 +45,12 @@ def get_all_portfolios():
 @require_auth
 def get_portfolio(portfolio_id):
     if not portfolio_service.has_portfolio_access(portfolio_id, g.username, ['Owner', 'Manager', 'Viewer']):
-        return jsonify({'error': 'Unauthorized to view this portfolio'}), 403
+        error_response = ErrorResponse(error='Unauthorized to view this portfolio', code=403)
+        return jsonify(error_response.model_dump()), 403
     portfolio = portfolio_service.get_portfolio_by_id(portfolio_id)
     if portfolio is None:
-        return jsonify({'error': f'Portfolio {portfolio_id} not found'}), 404
+        error_response = ErrorResponse(error=f'Portfolio {portfolio_id} not found', code=404)
+        return jsonify(error_response.model_dump()), 404
     return jsonify(_enrich_portfolio(portfolio.__to_dict__())), 200
 
 
@@ -60,7 +62,8 @@ def get_portfolios_by_user(username):
         return jsonify(error_response.model_dump()), 403
     user = user_service.get_user_by_username(username)
     if user is None:
-        return jsonify({'error': f'User {username} not found'}), 404
+        error_response = ErrorResponse(error=f'User {username} not found', code=404)
+        return jsonify(error_response.model_dump()), 404
     portfolios = portfolio_service.get_portfolios_by_user(user)
     return jsonify([_enrich_portfolio(p.__to_dict__()) for p in portfolios]), 200
 
@@ -70,10 +73,12 @@ def get_portfolios_by_user(username):
 def create_portfolio():
     req_data = PortfolioCreateRequest(**(request.get_json(silent=True) or {}))
     if g.username != req_data.username:
-        return jsonify({'error': 'Can only create portfolio for authenticated user'}), 403
+        error_response = ErrorResponse(error='Can only create portfolio for authenticated user', code=403)
+        return jsonify(error_response.model_dump()), 403
     user = user_service.get_user_by_username(req_data.username)
     if user is None:
-        return jsonify({'error': f'User {req_data.username} not found'}), 404
+        error_response = ErrorResponse(error=f'User {req_data.username} not found', code=404)
+        return jsonify(error_response.model_dump()), 404
     portfolio = portfolio_service.create_portfolio(
         name=req_data.name,
         description=req_data.description,
@@ -87,7 +92,8 @@ def create_portfolio():
 @require_auth
 def delete_portfolio(portfolio_id):
     if not portfolio_service.has_portfolio_access(portfolio_id, g.username, ['Owner']):
-        return jsonify({'error': 'Only the Owner can delete this portfolio'}), 403
+        error_response = ErrorResponse(error='Only the Owner can delete this portfolio', code=403)
+        return jsonify(error_response.model_dump()), 403
     portfolio_service.delete_portfolio(portfolio_id)
     db.session.commit()
     return jsonify({'message': 'Portfolio deleted successfully'}), 200
@@ -97,7 +103,8 @@ def delete_portfolio(portfolio_id):
 @require_auth
 def get_portfolio_transactions(portfolio_id):
     if not portfolio_service.has_portfolio_access(portfolio_id, g.username, ['Owner', 'Manager', 'Viewer']):
-        return jsonify({'error': 'Unauthorized to view this portfolio info'}), 403
+        error_response = ErrorResponse(error='Unauthorized to view this portfolio info', code=403)
+        return jsonify(error_response.model_dump()), 403
     transactions = transaction_service.get_transactions_by_portfolio_id(portfolio_id)
     return jsonify([transaction.__to_dict__() for transaction in transactions]), 200
 
@@ -105,7 +112,8 @@ def get_portfolio_transactions(portfolio_id):
 @require_auth
 def grant_access(portfolio_id):
     if not portfolio_service.has_portfolio_access(portfolio_id, g.username, ['Owner']):
-        return jsonify({'error': 'Only the Owner can grant access to this portfolio'}), 403
+        error_response = ErrorResponse(error='Only the Owner can grant access to this portfolio', code=403)
+        return jsonify(error_response.model_dump()), 403
     req_data = PortfolioAccessRequest(**(request.get_json(silent=True) or {}))
     portfolio_service.grant_portfolio_access(portfolio_id, req_data.username, req_data.role)
     db.session.commit()
@@ -115,7 +123,8 @@ def grant_access(portfolio_id):
 @require_auth
 def revoke_access(portfolio_id, username):
     if not portfolio_service.has_portfolio_access(portfolio_id, g.username, ['Owner']):
-        return jsonify({'error': 'Only the Owner can revoke access to this portfolio'}), 403
+        error_response = ErrorResponse(error='Only the Owner can revoke access to this portfolio', code=403)
+        return jsonify(error_response.model_dump()), 403
     portfolio_service.revoke_portfolio_access(portfolio_id, username)
     db.session.commit()
     return jsonify({'message': 'Portfolio access revoked successfully'}), 200

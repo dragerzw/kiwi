@@ -29,7 +29,8 @@ def get_user(username):
         return jsonify(error_response.model_dump()), 403
     user = user_service.get_user_by_username(username)
     if user is None:
-        return jsonify({'error': f'User {username} not found'}), 404
+        error_response = ErrorResponse(error=f'User {username} not found', code=404)
+        return jsonify(error_response.model_dump()), 404
     return jsonify(user.__to_dict__()), 200
 
 

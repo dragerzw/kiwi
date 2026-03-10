@@ -5,6 +5,7 @@ from app.schemas.trade_schemas import TradeBuyRequest, TradeSellRequest
 from app.service import trade_service
 from app.service.portfolio_service import has_portfolio_access
 from app.auth import require_auth
+from app.schemas.error_schemas import ErrorResponse
 
 trade_bp = Blueprint('trade', __name__)
 
@@ -14,7 +15,8 @@ trade_bp = Blueprint('trade', __name__)
 def buy_trade():
     req_data = TradeBuyRequest(**(request.get_json(silent=True) or {}))
     if not has_portfolio_access(req_data.portfolio_id, g.username, ['Owner', 'Manager']):
-        return jsonify({'error': 'Unauthorized to trade on this portfolio'}), 403
+        error_response = ErrorResponse(error='Unauthorized to trade on this portfolio', code=403)
+        return jsonify(error_response.model_dump()), 403
     trade_service.execute_purchase_order(
         portfolio_id=req_data.portfolio_id,
         ticker=req_data.ticker,
@@ -29,7 +31,8 @@ def buy_trade():
 def sell_trade():
     req_data = TradeSellRequest(**(request.get_json(silent=True) or {}))
     if not has_portfolio_access(req_data.portfolio_id, g.username, ['Owner', 'Manager']):
-        return jsonify({'error': 'Unauthorized to trade on this portfolio'}), 403
+        error_response = ErrorResponse(error='Unauthorized to trade on this portfolio', code=403)
+        return jsonify(error_response.model_dump()), 403
     trade_service.liquidate_investment(
         portfolio_id=req_data.portfolio_id,
         ticker=req_data.ticker,
