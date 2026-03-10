@@ -14,13 +14,19 @@ user_bp = Blueprint('user', __name__)
 @user_bp.route('/', methods=['GET'])
 @require_auth
 def get_users():
-    users = user_service.get_all_users()
-    return jsonify([user.__to_dict__() for user in users]), 200
+    user = user_service.get_user_by_username(g.username)
+    if user is None:
+        error_response = ErrorResponse(error=f'User {g.username} not found', code=404)
+        return jsonify(error_response.model_dump()), 404
+    return jsonify([user.__to_dict__()]), 200
 
 
 @user_bp.route('/<username>', methods=['GET'])
 @require_auth
 def get_user(username):
+    if g.username != username:
+        error_response = ErrorResponse(error='Unauthorized to view this user', code=403)
+        return jsonify(error_response.model_dump()), 403
     user = user_service.get_user_by_username(username)
     if user is None:
         return jsonify({'error': f'User {username} not found'}), 404
@@ -51,6 +57,9 @@ def create_user():
 @require_auth
 def update_balance():
     req_data = UserUpdateBalanceRequest(**(request.get_json(silent=True) or {}))
+    if req_data.username != g.username:
+        error_response = ErrorResponse(error='Unauthorized to update this user balance', code=403)
+        return jsonify(error_response.model_dump()), 403
     user_service.update_user_balance(username=req_data.username, new_balance=req_data.new_balance)
     db.session.commit()
     return jsonify({'message': 'User balance updated successfully'}), 200
@@ -59,6 +68,9 @@ def update_balance():
 @user_bp.route('/<username>', methods=['DELETE'])
 @require_auth
 def delete_user(username):
+    if g.username != username:
+        error_response = ErrorResponse(error='Unauthorized to delete this user', code=403)
+        return jsonify(error_response.model_dump()), 403
     user_service.delete_user(username)
     db.session.commit()
     return jsonify({'message': 'User deleted successfully'}), 200

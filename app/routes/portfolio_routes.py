@@ -34,6 +34,9 @@ def _enrich_portfolio(portfolio_dict: dict) -> dict:
 @require_auth
 def get_all_portfolios():
     user = user_service.get_user_by_username(g.username)
+    if user is None:
+        error_response = ErrorResponse(error=f'User {g.username} not found', code=404)
+        return jsonify(error_response.model_dump()), 404
     portfolios = portfolio_service.get_portfolios_by_user(user)
     return jsonify([_enrich_portfolio(p.__to_dict__()) for p in portfolios]), 200
 

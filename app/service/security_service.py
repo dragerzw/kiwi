@@ -20,7 +20,7 @@ def get_security_by_ticker(ticker: str) -> Optional[SecurityQuote]:
     try:
         quote = get_quote(ticker)
     except Exception as e:
-        raise SecurityFetchException(f"Failed to fetch security data for {ticker}: {str(e)}")
+        raise SecurityFetchException(f"Failed to fetch security data for {ticker}: {str(e)}") from e
         
     if not quote:
         raise SecurityNotFoundException(f"Security with ticker {ticker} could not be found.")

@@ -19,7 +19,7 @@ class Portfolio(db.Model):
     description: Mapped[str] = mapped_column(String(500), nullable=True)
     owner: Mapped[str] = mapped_column(String(30), ForeignKey('user.username'), nullable=False)
 
-    investments: Mapped[List['Investment']] = relationship('Investment', back_populates='portfolio', lazy='selectin')
+    investments: Mapped[List['Investment']] = relationship('Investment', back_populates='portfolio', lazy='selectin', cascade='all, delete-orphan')
 
     user: Mapped['User'] = relationship('User', foreign_keys=[owner], back_populates='portfolios', lazy='selectin')
 

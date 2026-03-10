@@ -1,11 +1,11 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, g
 
 import app.service.security_service as security_service
 import app.service.transaction_service as transaction_service
 
 from dataclasses import asdict
 from app.auth import require_auth
-from app.service.security_service import SecurityException, SecurityNotFoundException, SecurityFetchException
+from app.service.security_service import SecurityNotFoundException, SecurityFetchException
 from app.schemas.error_schemas import ErrorResponse
 
 
@@ -36,4 +36,10 @@ def get_security(ticker):
 @require_auth
 def get_security_transactions(ticker):
     transactions = transaction_service.get_transactions_by_ticker(ticker)
-    return jsonify([transaction.__to_dict__() for transaction in transactions]), 200
+    sanitized_transactions = []
+    for transaction in transactions:
+        transaction_dict = transaction.__to_dict__()
+        transaction_dict.pop('username', None)
+        transaction_dict.pop('portfolio_id', None)
+        sanitized_transactions.append(transaction_dict)
+    return jsonify(sanitized_transactions), 200

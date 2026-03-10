@@ -42,7 +42,7 @@ class User(db.Model):
             f"<User: username='{self.username}'; "
             f"name='{self.firstname} {self.lastname}'; "
             f'#portfolios={len(self.portfolios)}; '
-            f'balance={self.balance})'
+            f'balance={self.balance}>'
         )
 
     def __to_dict__(self):

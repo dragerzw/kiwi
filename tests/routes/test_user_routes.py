@@ -10,7 +10,7 @@ def test_get_user(client, auth_headers):
 
 def test_get_user_not_found(client, auth_headers):
     response = client.get('/users/unknown', headers=auth_headers)
-    assert response.status_code == 404
+    assert response.status_code == 403
 
 def test_create_user(client, auth_headers):
     data = {
@@ -31,11 +31,13 @@ def test_update_balance(client, auth_headers):
     response = client.put('/users/update-balance', json=data, headers=auth_headers)
     assert response.status_code == 200
 
-def test_delete_user(client, auth_headers):
-    data = {"username": "to_be_deleted", "password": "x", "firstname": "A", "lastname": "B", "balance": 0.0}
-    client.post('/users/', json=data, headers=auth_headers)
-    response = client.delete('/users/to_be_deleted', headers=auth_headers)
-    assert response.status_code == 200
+def test_delete_user_unauthorized(client, auth_headers):
+    response = client.delete('/users/other_user', headers=auth_headers)
+    assert response.status_code == 403
+
+def test_delete_user_admin_protected(client, auth_headers):
+    response = client.delete('/users/admin', headers=auth_headers)
+    assert response.status_code == 400
 
 def test_get_user_transactions(client, auth_headers):
     response = client.get('/users/admin/transactions', headers=auth_headers)

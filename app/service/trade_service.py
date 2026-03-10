@@ -40,7 +40,7 @@ def execute_purchase_order(portfolio_id: int, ticker: str, quantity: int):
     try:
         quote = get_quote(ticker)
     except Exception as e:
-        raise TradeExecutionException(f'Failed to fetch security data for {ticker}: {str(e)}')
+        raise TradeExecutionException(f'Failed to fetch security data for {ticker}: {str(e)}') from e
     
     if not quote:
         raise TradeExecutionException(f'Security with ticker {ticker} could not be found via Alpha Vantage.')
