@@ -11,7 +11,11 @@ def get_all_securities() -> List[SecurityQuote]:
     return []
 
 def get_security_by_ticker(ticker: str) -> Optional[SecurityQuote]:
-    quote = get_quote(ticker)
+    try:
+        quote = get_quote(ticker)
+    except Exception as e:
+        raise SecurityException(f"Failed to fetch security data for {ticker}: {str(e)}")
+        
     if not quote:
         raise SecurityException(f"Security with ticker {ticker} could not be found.")
     return quote

@@ -6,6 +6,7 @@ import app.service.transaction_service as transaction_service
 from dataclasses import asdict
 from app.auth import require_auth
 from app.service.security_service import SecurityException
+from app.schemas.error_schemas import ErrorResponse
 
 
 security_bp = Blueprint('security', __name__)
@@ -24,7 +25,8 @@ def get_security(ticker):
         security = security_service.get_security_by_ticker(ticker)
         return jsonify(asdict(security)), 200
     except SecurityException as e:
-        return jsonify({'error': str(e)}), 404
+        error_response = ErrorResponse(error=str(e), code=404)
+        return jsonify(error_response.model_dump()), 404
 
 
 @security_bp.route('/<ticker>/transactions', methods=['GET'])

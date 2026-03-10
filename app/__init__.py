@@ -5,6 +5,7 @@ from werkzeug.exceptions import HTTPException
 from app.db import db
 from app.cache import cache
 from app.routes import portfolio_bp, security_bp, trade_bp, user_bp
+from app.schemas.error_schemas import ErrorResponse
 
 
 def create_app(config):
@@ -25,38 +26,53 @@ def create_app(config):
         # Register error handlers
         @app.errorhandler(HTTPException)
         def handle_http_exception(e):
-            return jsonify({'error': e.name, 'detail': e.description}), e.code
+            code = getattr(e, 'code', 500)
+            error_response = ErrorResponse(error=e.description or e.name, code=code)
+            return jsonify(error_response.model_dump()), code
 
         @app.errorhandler(ValidationError)
-        def handle_validation_error(e: ValidationError):
-            return jsonify({'error': 'Validation Error', 'detail': e.errors()}), 422
+        def handle_validation_error(error: ValidationError):
+            first_error = error.errors()[0]
+            error_message = f"{first_error['loc'][0]}: {first_error['msg']}"
+            error_response = ErrorResponse(error=error_message, code=400)
+            return jsonify(error_response.model_dump()), 400
 
-        # Domain exception handlers — return 400 instead of 500
+        @app.errorhandler(404)
+        def handle_not_found(error):
+            error_response = ErrorResponse(error="Resource not found", code=404)
+            return jsonify(error_response.model_dump()), 404
+
+        # Domain exception handlers
         from app.service.user_service import UnsupportedUserOperationError
         from app.service.portfolio_service import UnsupportedPortfolioOperationError
         from app.service.trade_service import TradeExecutionException, InsufficientFundsError
 
         @app.errorhandler(UnsupportedUserOperationError)
         def handle_user_error(e):
-            return jsonify({'error': str(e)}), 400
+            error_response = ErrorResponse(error=str(e), code=400)
+            return jsonify(error_response.model_dump()), 400
 
         @app.errorhandler(UnsupportedPortfolioOperationError)
         def handle_portfolio_error(e):
-            return jsonify({'error': str(e)}), 400
+            error_response = ErrorResponse(error=str(e), code=400)
+            return jsonify(error_response.model_dump()), 400
 
         @app.errorhandler(TradeExecutionException)
         def handle_trade_error(e):
-            return jsonify({'error': str(e)}), 400
+            error_response = ErrorResponse(error=str(e), code=400)
+            return jsonify(error_response.model_dump()), 400
 
         @app.errorhandler(InsufficientFundsError)
         def handle_insufficient_funds_error(e):
-            return jsonify({'error': str(e)}), 400
+            error_response = ErrorResponse(error=str(e), code=400)
+            return jsonify(error_response.model_dump()), 400
 
         @app.errorhandler(Exception)
         def handle_exception(e):
             db.session.rollback()
             detail = str(e) if app.debug else 'An unexpected error occurred'
-            return jsonify({'error': 'Internal Server Error', 'detail': detail}), 500
+            error_response = ErrorResponse(error=detail, code=500)
+            return jsonify(error_response.model_dump()), 500
 
         return app
     except Exception as e:

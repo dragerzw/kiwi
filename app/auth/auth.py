@@ -87,6 +87,7 @@ def require_auth(f):
             
         g.user_id = payload.get("sub")
         g.username = payload.get("username") or payload.get("cognito:username")
+        g.current_user = payload
         
         return f(*args, **kwargs)
 

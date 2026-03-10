@@ -37,7 +37,11 @@ def execute_purchase_order(portfolio_id: int, ticker: str, quantity: int):
     if not user:
         raise TradeExecutionException(f'User associated with the portfolio ({portfolio_id}) does not exist.')
 
-    quote = get_quote(ticker)
+    try:
+        quote = get_quote(ticker)
+    except Exception as e:
+        raise TradeExecutionException(f'Failed to fetch security data for {ticker}: {str(e)}')
+    
     if not quote:
         raise TradeExecutionException(f'Security with ticker {ticker} could not be found via Alpha Vantage.')
     total_cost = quote.price * quantity
