@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+.vscode/
+.coverage
+notes/
+.pytest_cache/
+.env
+app.*
+local/
+.ruff*
+*.md
+test_output.txt
